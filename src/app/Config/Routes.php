@@ -33,8 +33,10 @@ $routes->setAutoRoute(false);
 // We get a performance increase by specifying the default
 // route since we don't have to scan directories.
 //$routes->get('/', 'Home::index');
-$routes->get('/', 'CommentController::index');
+$routes->get('/', 'CommentController::index', ['as' => 'show_comments']);
+$routes->post('/add', 'CommentController::add');
 $routes->post('/del', 'CommentController::delete');
+$routes->get('/del', 'CommentController::delete');//for testing purposes (in case the request is not made by ajax). Warning message expected.
 
 /*
  * --------------------------------------------------------------------

@@ -20,8 +20,12 @@ class CommentController extends BaseController
 	 */
 	public function index()
 	{
-		$comments = $this->model->orderBy('id', 'desc')->findAll(3);
-		return view('comment_chart', compact('comments'));
+		$viewData = [
+			'comments' => $this->model->orderBy('id', 'DESC')->paginate(3),
+			'pager' => $this->model->pager,
+		];
+
+		return view('comment_chart', $viewData);
 	}
 
 
@@ -30,11 +34,22 @@ class CommentController extends BaseController
 	 *
 	 * @return mixed
 	 */
-	public function create()
+	public function add()
 	{
-		//
-	}
+		$params = $this->request->getPost();
+		$data = [
+			'name' => trim(strip_tags($params['creator_email'])),
+			'text' => trim(strip_tags($params['message_text'])),
+			'date' => $params['created_at']
+		];
 
+		if ($this->model->insert($data, false)) {
+			return redirect()->route('show_comments');
+		} else {
+			$errors = $this->model->errors();
+			return view('comment_chart', compact('errors'));
+		}
+	}
 
 	/**
 	 * Deletes the comment
@@ -48,8 +63,8 @@ class CommentController extends BaseController
 			'text' => '',
 		];
 		if ($this->request->isAJAX()) {
-			$query = $this->request->getPost();
-			if($this->model->delete((int)$query['id'])) {
+			$params = $this->request->getPost();
+			if ($this->model->delete((int)$params['id'])) {
 				$msg['status'] = 'OK';
 			} else {
 				$msg['text'] = 'Комментарий не был удален!';
@@ -57,8 +72,12 @@ class CommentController extends BaseController
 			return json_encode($msg);
 
 		} else {
-			$error = 'Incorrect Request';
-			return view('welcome_message', compact('error'));
+			$this->ajaxNeeded();
 		}
+	}
+
+	public function ajaxNeeded() {
+		$errors[] = 'Необходим Ajax (согласно ТЗ)';
+		return view('comment_chart', compact('errors'));
 	}
 }

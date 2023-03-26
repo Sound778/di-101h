@@ -7,11 +7,21 @@
 <?= $this->section('pageContent'); ?>
 <div class="card text-white bg-secondary w-100 p-3 mt-3">
     <div class="card-body">
-        <p class="card-text">Здесь размещен контент, который и комментируют...</p>
+        <p class="card-text">Здесь размещен контент, который комментируют...</p>
     </div>
 </div>
 <hr>
-<table class="table">
+<?php if (isset($errors)) { ?>
+	<div class="alert alert-warning alert-dismissible fade show" role="alert">
+        <?php
+        echo implode('<br>', $errors);
+        ?>
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+<?php } ?>
+<table class="table" id="commentsTbl">
     <thead>
     <tr class="table-primary">
         <th>id</th>
@@ -23,7 +33,7 @@
     </thead>
     <tbody>
     <?php
-    if (count($comments) > 0) {
+    if (isset($comments)) {
         foreach ($comments as $row) {
             echo '<tr data-line="' . $row['id'] . '">',
                 '<td>' . $row['id'] . '</td>',
@@ -34,14 +44,22 @@
                 '</tr>' . PHP_EOL;
         }
     } else {
-        echo '<tr><td colspan="4">Записей не найдено!</td></tr>' . PHP_EOL;
+        echo '<tr><td colspan="5">Записей не найдено!</td></tr>' . PHP_EOL;
     }
     ?>
     </tbody>
 </table>
+<div class="d-flex justify-content-center">
+	<?php if (isset($pager)) {
+        $page_path='/';
+        $pager->setPath($page_path);
+        echo $pager->links('default', 'bootstrap');
+	}
+	?>
+</div>
 <hr>
 <div>
-    <form name="addCommentFrm">
+    <form class="no-sbm-by-enter" name="add_comment_frm" id="addCommentFrm" method="post" action="/add">
         <h4>Добавить комментарий</h4>
         <div class="form-row">
             <div class="form-group col-md-6">
@@ -51,16 +69,16 @@
             </div>
             <div class="form-group col-md-6">
                 <label for="createdAt">Дата создания комментария</label>
-                <input type="date" class="form-control" id="createdAt" name="created_at" aria-describedby="dateHelp">
+                <input type="date" class="form-control" id="createdAt" name="created_at" aria-describedby="dateHelp" max="<?= strftime('%Y-%m-%d'); ?>">
                 <small id="emailHelp" class="form-text text-muted">Дата создания комментария (выбирается создателем)</small>
             </div>
         </div>
         <div class="form-group">
             <label for="messageText">Комментарий</label>
-            <textarea class="form-control" id="messageText" name="message_text"></textarea>
+            <textarea class="form-control" id="messageText" name="message_text" required></textarea>
         </div>
-        <button type="button" class="btn btn-primary">Отправить</button>
-        <button type="button" class="btn btn-outline-secondary">Очистить</button>
+        <button type="button" class="btn btn-primary" id="addCommentSbmBtn">Отправить</button>
+        <button type="reset" class="btn btn-outline-secondary" id="addCommentResetBtn">Очистить</button>
     </form>
 </div>
 <div class="modal" id="delConfirmModal" tabindex="-1" role="dialog">
@@ -88,31 +106,47 @@
 <script>
     $(function() {
         let delCommentDialog = $('#delConfirmModal');
-        let delIndx = null;
+        let delIndex = null;
+        let commentForm = $('#addCommentFrm');
+
         $('.js-del-comment').on('click', function() {
             delCommentDialog.modal('toggle', $(this));
         });
 
         delCommentDialog.on('show.bs.modal', function (e) {
-            delIndx = $(e.relatedTarget).parent().parent().data('line');
+            delIndex = $(e.relatedTarget).parent().parent().data('line');
         });
 
         $('#modalDelBtn').on('click', function() {
             $.ajax({
-                url: "/del",
-                type: "post",
-                data: {id:delIndx},
-                dataType: "json",
+                url: '/del',
+                type: 'post',
+                data: {id:delIndex},
+                dataType: 'json',
                 success: function(msg) {
                     delCommentDialog.modal('toggle');
                     if(msg.status === 'OK') {
-                        $("tr[data-line='" + delIndx +"']").remove();
+                        $("tr[data-line='" + delIndex +"']").remove();
                     }else{
                         alert(msg.text);
                     }
                 }
             });
         });
+
+        $('#addCommentSbmBtn').on('click', function() {
+            if(!$('#creatorEmail').val().trim().length || !$('#createdAt').val().trim().length) {
+                return false;
+            }else{
+                commentForm.submit();
+            }
+        });
+    });
+    $(document).on('keypress', '.no-sbm-by-enter', function(e){
+        if(e.which === 13) {
+            e.preventDefault();
+            return false;
+        }
     });
 </script>
 <?= $this->endSection(); ?>
