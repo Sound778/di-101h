@@ -37,6 +37,7 @@ $routes->get('/', 'CommentController::index', ['as' => 'show_comments']);
 $routes->post('/add', 'CommentController::add');
 $routes->post('/del', 'CommentController::delete');
 $routes->get('/del', 'CommentController::delete');//for testing purposes (in case the request is not made by ajax). Warning message expected.
+$routes->post('/sort', 'CommentController::sort');//set sorter
 
 /*
  * --------------------------------------------------------------------

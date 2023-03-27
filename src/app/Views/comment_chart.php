@@ -1,6 +1,8 @@
 <?php
 /**
  * @var array $comments
+ * @var array $selector sorting options
+ * @var int $current_sort_order current chosen sorting order
  */
 ?>
 <?= $this->extend('layout/main'); ?>
@@ -50,6 +52,15 @@
     </tbody>
 </table>
 <div class="d-flex justify-content-center">
+    <form class="mr-md-3" name="order_by_frm" id="orderByFrm" method="post" action="/sort">
+        <select class="custom-select" name="order_by" id="orderBy">
+            <?php
+            foreach($selector as $k => $v) {
+                echo '<option value="' . $k . '" ' .($k === $current_sort_order ? ' selected' :''). '>' . $v . '</option>'.PHP_EOL;
+            }
+            ?>
+        </select>
+    </form>
 	<?php if (isset($pager)) {
         $page_path='/';
         $pager->setPath($page_path);
@@ -140,6 +151,10 @@
             }else{
                 commentForm.submit();
             }
+        });
+
+        $('#orderBy').on('change', function() {
+           $('#orderByFrm').submit();
         });
     });
     $(document).on('keypress', '.no-sbm-by-enter', function(e){
