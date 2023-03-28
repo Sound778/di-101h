@@ -38,7 +38,6 @@ class CommentController extends BaseController
 		$session = session();
 		$sort_order = $session->get('comments_order') ?? 1;
 		$viewData = [
-			//'comments' => $this->model->orderBy('id', 'DESC')->paginate(3),
 			'comments' => $this->model->orderBy(implode(' ', $this->order_by['query'][$sort_order]))->paginate(3),
 			'pager' => $this->model->pager,
 			'selector' => $this->order_by['selector'],
@@ -56,6 +55,7 @@ class CommentController extends BaseController
 	 */
 	public function add()
 	{
+		$session = session();
 		$params = $this->request->getPost();
 		$data = [
 			'name' => trim(strip_tags($params['creator_email'])),
@@ -63,12 +63,10 @@ class CommentController extends BaseController
 			'date' => $params['created_at']
 		];
 
-		if ($this->model->insert($data, false)) {
-			return redirect()->route('show_comments');
-		} else {
-			$errors = $this->model->errors();
-			return view('comment_chart', compact('errors'));
+		if (!$this->model->insert($data, false)) {
+			$session->setFlashdata('flash_errors', $this->model->errors());
 		}
+		return redirect()->route('show_comments');
 	}
 
 	/**
@@ -92,7 +90,7 @@ class CommentController extends BaseController
 			return json_encode($msg);
 
 		} else {
-			$this->ajaxNeeded();
+			return $this->ajaxNeeded();
 		}
 	}
 
@@ -102,8 +100,9 @@ class CommentController extends BaseController
 	 * @return string
 	 */
 	public function ajaxNeeded() {
-		$errors[] = 'Необходим Ajax (согласно ТЗ)';
-		return view('comment_chart', compact('errors'));
+		$session = session();
+		$session->setFlashdata('flash_errors', $this->model->errors());
+		return redirect()->route('show_comments');
 	}
 
 	/**

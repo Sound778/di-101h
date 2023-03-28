@@ -13,10 +13,10 @@
     </div>
 </div>
 <hr>
-<?php if (isset($errors)) { ?>
+<?php if (session()->has('flash_errors')) { ?>
 	<div class="alert alert-warning alert-dismissible fade show" role="alert">
         <?php
-        echo implode('<br>', $errors);
+        echo implode('<br>', session()->getFlashdata('flash_errors'));
         ?>
         <button type="button" class="close" data-dismiss="alert" aria-label="Close">
             <span aria-hidden="true">&times;</span>
@@ -35,7 +35,7 @@
     </thead>
     <tbody>
     <?php
-    if (isset($comments)) {
+    if (!empty($comments)) {
         foreach ($comments as $row) {
             echo '<tr data-line="' . $row['id'] . '">',
                 '<td>' . $row['id'] . '</td>',
@@ -61,7 +61,7 @@
             ?>
         </select>
     </form>
-	<?php if (isset($pager)) {
+	<?php if (!empty($pager)) {
         $page_path='/';
         $pager->setPath($page_path);
         echo $pager->links('default', 'bootstrap');
@@ -75,20 +75,20 @@
         <div class="form-row">
             <div class="form-group col-md-6">
                 <label for="creatorEmail">Электронная почта</label>
-                <input type="email" class="form-control" id="creatorEmail" name="creator_email" aria-describedby="emailHelp">
+                <input type="email" class="form-control" id="creatorEmail" name="creator_email" aria-describedby="emailHelp" required>
                 <small id="emailHelp" class="form-text text-muted">Поле обязательно для заполнения!</small>
             </div>
             <div class="form-group col-md-6">
                 <label for="createdAt">Дата создания комментария</label>
-                <input type="date" class="form-control" id="createdAt" name="created_at" aria-describedby="dateHelp" max="<?= strftime('%Y-%m-%d'); ?>">
-                <small id="emailHelp" class="form-text text-muted">Дата создания комментария (выбирается создателем)</small>
+                <input type="date" class="form-control" id="createdAt" name="created_at" aria-describedby="dateHelp" max="<?= strftime('%Y-%m-%d'); ?>" required>
+                <small id="dateHelp" class="form-text text-muted">Дата создания комментария (выбирается создателем)</small>
             </div>
         </div>
         <div class="form-group">
             <label for="messageText">Комментарий</label>
             <textarea class="form-control" id="messageText" name="message_text" required></textarea>
         </div>
-        <button type="button" class="btn btn-primary" id="addCommentSbmBtn">Отправить</button>
+        <button type="submit" class="btn btn-primary" id="addCommentSbmBtn">Отправить</button>
         <button type="reset" class="btn btn-outline-secondary" id="addCommentResetBtn">Очистить</button>
     </form>
 </div>
@@ -145,13 +145,13 @@
             });
         });
 
-        $('#addCommentSbmBtn').on('click', function() {
+        /*$('#addCommentSbmBtn').on('click', function() {
             if(!$('#creatorEmail').val().trim().length || !$('#createdAt').val().trim().length) {
                 return false;
             }else{
                 commentForm.submit();
             }
-        });
+        });*/
 
         $('#orderBy').on('change', function() {
            $('#orderByFrm').submit();
