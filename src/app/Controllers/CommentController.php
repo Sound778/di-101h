@@ -51,7 +51,7 @@ class CommentController extends BaseController
 	/**
 	 * Creates a new comment
 	 *
-	 * @return mixed
+	 * @return \CodeIgniter\HTTP\RedirectResponse
 	 */
 	public function add()
 	{
@@ -97,11 +97,11 @@ class CommentController extends BaseController
 	/**
 	 * displays alert when ajax request is needed
 	 *
-	 * @return string
+	 * @return \CodeIgniter\HTTP\RedirectResponse
 	 */
 	public function ajaxNeeded() {
 		$session = session();
-		$session->setFlashdata('flash_errors', $this->model->errors());
+		$session->setFlashdata('flash_errors', ['AJAX needed!']);
 		return redirect()->route('show_comments');
 	}
 

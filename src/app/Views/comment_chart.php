@@ -61,16 +61,18 @@
             ?>
         </select>
     </form>
+    <div id="myPager">
 	<?php if (!empty($pager)) {
         $page_path='/';
         $pager->setPath($page_path);
         echo $pager->links('default', 'bootstrap');
 	}
 	?>
+    </div>
 </div>
 <hr>
 <div>
-    <form class="no-sbm-by-enter" name="add_comment_frm" id="addCommentFrm" method="post" action="/add">
+    <form name="add_comment_frm" id="addCommentFrm" method="post" action="/add">
         <h4>Добавить комментарий</h4>
         <div class="form-row">
             <div class="form-group col-md-6">
@@ -138,6 +140,13 @@
                     delCommentDialog.modal('toggle');
                     if(msg.status === 'OK') {
                         $("tr[data-line='" + delIndex +"']").remove();
+                        if(!$('#commentsTbl tbody tr').length) {
+                            if($('ul.pagination li').length>1 && $('ul.pagination li:last').hasClass('active')) {
+                                location.href = $('ul.pagination li.active').prev().find('a').attr('href');
+                            }else {
+                                location.reload();
+                            }
+                        }
                     }else{
                         alert(msg.text);
                     }
@@ -145,23 +154,9 @@
             });
         });
 
-        /*$('#addCommentSbmBtn').on('click', function() {
-            if(!$('#creatorEmail').val().trim().length || !$('#createdAt').val().trim().length) {
-                return false;
-            }else{
-                commentForm.submit();
-            }
-        });*/
-
         $('#orderBy').on('change', function() {
            $('#orderByFrm').submit();
         });
-    });
-    $(document).on('keypress', '.no-sbm-by-enter', function(e){
-        if(e.which === 13) {
-            e.preventDefault();
-            return false;
-        }
     });
 </script>
 <?= $this->endSection(); ?>
